@@ -7,13 +7,8 @@ namespace Poc_ResponseCompression_And_RateLimit.Controllers;
 public class DividaController : ControllerBase
 {
     [HttpGet]
-    public IEnumerable<DividaDto> Get()
+    public ActionResult<DividaDto> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new DividaDto
-        {
-            DataLimiteNegociacao = DateTime.Now.AddDays(index),
-            ValorTotal = (decimal)Random.Shared.NextDouble() * 100,
-        })
-        .ToArray();
+        return Ok(new DividaDto());
     }
 }

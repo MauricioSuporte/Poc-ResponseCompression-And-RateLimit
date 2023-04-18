@@ -2,14 +2,14 @@
 {
     public class ParcelaDto
     {
-        public DateTime DataVencimento { get; set; }
+        public int NumeroParcela { get; set; }
 
         public decimal? Valor { get; set; }
+
+        public DateTime DataVencimento { get; set; }
 
         public bool Vencida { get; set; }
 
         public bool Paga { get; set; }
-
-        public int NumeroParcela { get; set; }
     }
 }
