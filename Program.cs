@@ -4,11 +4,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddResponseCompression();
 
 var app = builder.Build();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseResponseCompression();
 
 app.Run();
