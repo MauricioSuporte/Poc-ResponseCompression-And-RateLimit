@@ -11,20 +11,20 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddResponseCompression(options =>
 {
-    // Configure os algoritmos de compressão desejados
+    // Configure the wishing algorithms
     options.Providers.Add<GzipCompressionProvider>();
 
-    // Opções adicionais de compressão
+    // Additional compression options
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/json" });
     options.EnableForHttps = true;
 });
 
 builder.Services.AddRateLimiter(options =>
 {
-    // Adiciona status code 429 quando limite atingido
+    // Add status code 429 when limit reached
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    // Adiciona política de janela fixa
+    // Add fixed window policy
     options.AddFixedWindowLimiter(policyName: "FixedWindowRateLimiter", options =>
     {
         options.PermitLimit = 5;
@@ -33,24 +33,25 @@ builder.Services.AddRateLimiter(options =>
         options.QueueLimit = 0;
     });
 
-    // Adiciona mensagem de limite atingido ao usuario
+    // Add limit reached message to user
     options.OnRejected = async (context, token) =>
     {
         context.HttpContext.Response.StatusCode = 429;
         if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
         {
             await context.HttpContext.Response.WriteAsync(
-                $"Muitos requests feitos. Tente novamente depois " +
-                $"de {retryAfter.TotalMinutes} minuto(s). \n\n" +
-                $"Leia mais sobre nossa politica de limites em " +
-                $"https://exemplo.org/docs/ratelimiting.",
+                $"Lots of requests. Try again later " +
+                $"{retryAfter.TotalMinutes} minutes(s). \n\n" +
+                $"Read more about our limits policy at " +
+                $"https://exemple.org/docs/ratelimiting.",
                 cancellationToken: token);
         }
         else
         {
             await context.HttpContext.Response.WriteAsync(
-                "Muitos requests feitos. Tente novamente mais tarde. " +
-                "Leia mais sobre o assunto em https://exemplo.org/docs/ratelimiting.",
+                "Many requests. Try again later " +
+                "Read more about our limits policy at " +
+                "https://exemple.org/docs/ratelimiting.",
                 cancellationToken: token);
         }
     };
