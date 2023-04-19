@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,18 +11,14 @@ builder.Services.AddResponseCompression();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-    RateLimitPartition.GetFixedWindowLimiter(
-    partitionKey: httpContext.User.Identity?.Name ??
-                  httpContext.Request.Headers.Host.ToString(),
-        factory: partition => new FixedWindowRateLimiterOptions
-        {
-            AutoReplenishment = true,
-            PermitLimit = 10,
-            QueueLimit = 0,
-            Window = TimeSpan.FromMinutes(1)
-        }));
+
+    options.AddFixedWindowLimiter(policyName: "FixedWindowRateLimiter", options =>
+    {
+        options.PermitLimit = 5;
+        options.Window = TimeSpan.FromMinutes(1);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
 
     options.OnRejected = async (context, token) =>
     {
