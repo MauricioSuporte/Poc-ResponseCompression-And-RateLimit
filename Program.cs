@@ -22,6 +22,27 @@ builder.Services.AddRateLimiter(options =>
             QueueLimit = 0,
             Window = TimeSpan.FromMinutes(1)
         }));
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            await context.HttpContext.Response.WriteAsync(
+                $"Muitos requests feitos. Tente novamente depois " +
+                $"de {retryAfter.TotalMinutes} minuto(s). \n\n" +
+                $"Leia mais sobre nossa politica de limites em " +
+                $"https://exemplo.org/docs/ratelimiting.",
+                cancellationToken: token);
+        }
+        else
+        {
+            await context.HttpContext.Response.WriteAsync(
+                "Muitos requests feitos. Tente novamente mais tarde. " +
+                "Leia mais sobre o assunto em https://exemplo.org/docs/ratelimiting.",
+                cancellationToken: token);
+        }
+    };
 });
 
 var app = builder.Build();
