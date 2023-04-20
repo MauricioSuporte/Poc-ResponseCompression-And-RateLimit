@@ -1,6 +1,8 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.ResponseCompression;
+using Poc_ResponseCompression_And_RateLimit.Interfaces;
+using Poc_ResponseCompression_And_RateLimit.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Register Services
+builder.Services.AddScoped<IDividaService, DividaService>();
 
 builder.Services.AddResponseCompression(options =>
 {
@@ -40,7 +45,7 @@ builder.Services.AddRateLimiter(options =>
         if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
         {
             await context.HttpContext.Response.WriteAsync(
-                $"Lots of requests. Try again later " +
+                $"Lots of requests. Try again after " +
                 $"{retryAfter.TotalMinutes} minutes(s). \n\n" +
                 $"Read more about our limits policy at " +
                 $"https://exemple.org/docs/ratelimiting.",
